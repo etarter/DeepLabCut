@@ -1,3 +1,7 @@
+etarter d4fe1cb 2020-11-09 added structure description
+etarter 167f50b 2020-11-09 single animal dlc workflow
+etarter ab47e51 2020-11-09 modified readme
+etarter def05ea 2020-11-09 modified readme and changelog
 etarter 7f909ec 2020-11-09 added changelog
 etarter 7460971 2020-11-09 modified readme
 etarter c285084 2020-11-09 removed readme txt
