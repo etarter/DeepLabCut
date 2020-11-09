@@ -6,10 +6,6 @@ Coming soon
 
 Coming soon
 
-## Code Structure
-
-Something more
-
 ## Example Python Code
 
 ```python
