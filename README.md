@@ -1,8 +1,12 @@
-# Title
+# Description
 
 Something
 
-## Subtitle
+## Project Structure
+
+Something more
+
+## Code Structure
 
 Something more
 
