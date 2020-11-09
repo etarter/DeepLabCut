@@ -1,3 +1,5 @@
+etarter 5a5e767 2020-11-09 formatting changes
+etarter 9a7cbec 2020-11-09 updated changelog
 etarter d4fe1cb 2020-11-09 added structure description
 etarter 167f50b 2020-11-09 single animal dlc workflow
 etarter ab47e51 2020-11-09 modified readme
