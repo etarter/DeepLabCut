@@ -1,15 +1,8 @@
 ## Description
 
-Coming soon
+This repository contains all the relevant files for the computer vision for chronic in vivo trials project.
 
 ## Structure
 
-Coming soon
-
-## Example Python Code
-
-```python
-import library
-
-library.function(args) # function comment
-```
+DLC: single animal dlc project workflow
+maDLC: dlc project workflow extension to multianimal
