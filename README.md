@@ -1,22 +1,16 @@
-# Description
+## Description
 
-Something
+Coming soon
 
-## Project Structure
+## Structure
 
-Something more
+Coming soon
 
 ## Code Structure
 
 Something more
 
-## Bash Code
-
-```bash
-pip install library
-```
-
-## Python Code
+## Example Python Code
 
 ```python
 import library
