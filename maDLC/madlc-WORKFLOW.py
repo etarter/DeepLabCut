@@ -1,81 +1,133 @@
-#workflow for multianimal dlc
+import deeplabcut
+import tkinter
+from tkinter import filedialog
+import os
+import glob
 
-videos_dir = r'path_to_videos'
+def file_dialog(type):
+    root = tkinter.Tk()
+    root.geometry('0x0+0+0')
+    root.lift()
+    root.focus_force()
+    root.deiconify()
+    root.update_idletasks()
+    # root.overrideredirect(True)
+    # root.mainloop()
+    if type == 'file':
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "select config file")
+    elif type == 'directory':
+        path = filedialog.askdirectory(parent=root, initialdir=os.getcwd(), title='select video directory')     #add automatic video directory assignement
+    root.withdraw()
+    return path
 
-deeplabcut.create_new_project('projectname', 'experimentername', [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
+def new_project():
+    print('(y/n) do you want to create a new project?')
+    console = input()
+    loop = True
 
-config_path = r'path_to_config'
+    while loop:
+        if (console == 'y') or (console == 'yes'):
+            print('enter project name')
+            project_name = input()
+            print('enter your name')
+            your_name = input()
+            print('enter batch size')
+            batch = input()
+            print('enter videos directory')
+            videos_dir = os.path.join(file_dialog('directory'))
+            config_path = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
+            config_file = open(config_path, 'r')
+            contents = config_file.read()
+            starting_text = 'individuals:'
+            ending_text = 'cropping: false'
+            to_replace = contents[contents.find(starting_text)+len(starting_text):contents.rfind(ending_text)]
+            new_contents = contents.replace(to_replace, '\n- sheep1\n- sheep2\n- sheep3\nuniquebodyparts: []\nmultianimalbodyparts:\n- head\n- shoulder\n- back\n- dock\nskeleton:\n- - head\n  - shoulder\n- - head\n  - back\n- - head\n  - dock\n- - shoulder\n  - back\n- - shoulder\n  - dock\n- - back\n  - dock\nbodyparts: MULTI!\nstart: 0\nstop: 1\nnumframes2pick: 40\n\n    # Plotting configuration\nskeleton_color: black\npcutoff: 0.6\ndotsize: 3\nalphavalue: 0.7\ncolormap: plasma\n\n    # Training,Evaluation and Analysis\nconfiguration\nTrainingFraction:\n- 0.95\niteration: 1\ndefault_net_type: resnet_50\ndefault_augmenter: multi-animal-imgaug\nsnapshotindex: -1\nbatch_size: '+str(batch)+'\n\n    # Cropping Parameters (for analysis and outlier frame detection)\n')
+            config_file.close()
+            config_file = open(config_path, 'w')
+            config_file.write(new_contents)
+            config_file.close()
+            loop = False
+        elif (console == 'n') or (console == 'no'):
+            config_path = os.path.join(file_dialog('file'))
+            videos_dir = os.path.join(file_dialog('directory'))
+            loop = False
+        else:
+            print('try again')
+            console = input()
+    return config_path, videos_dir
 
-'''
-CHANGE IN CONFIG FILE
-individuals
-multianimalbodyparts
-skeleton (more than you would think for training)
-numframes2pick
-dotsize
-batchsize
-'''
+def run_workflow(config_path, videos_dir):
+    loop = True
+    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos and create labeled videos\n(r) extract outliers and refine labels\n(p) plot poses and analyze skeleton\n(m) merge and retrain network\n(v) add new videos'
+    print(what_to_do)
+    answer = input()
+    while loop:
+        if answer == 'e':
+            deeplabcut.extract_frames(config_path, mode='automatic', algo='kmeans', userfeedback=False)
+            print(what_to_do)
+            answer = input()
+        elif answer == 'l':
+            deeplabcut.label_frames(config_path)
+            print(what_to_do)
+            answer = input()
+        elif answer == 't':
+            deeplabcut.create_multianimaltraining_dataset(config_path, net_type='resnet_50')
+            print('max iterations')
+            iterations = input()
+            deeplabcut.train_network(config_path, displayiters=100, maxiters=iterations, allow_growth=True, gputouse=0)
+            deeplabcut.evaluate_network(config_path, gputouse=0, plotting=True)
+            deeplabcut.evaluate_multianimal_crossvalidate(config_path, plotting=True)
+            print(what_to_do)
+            answer = input()
+        elif answer == 'a':
+            videos_dir = os.path.join(file_dialog('directory'))
+            print('batch size')
+            batchsize = input()
+            scorername = deeplabcut.analyze_videos(config_path, [videos_dir], videotype='.mp4', gputouse=0, batchsize=batchsize, save_as_csv=False)
+            #deeplabcut.create_video_with_all_detections(config_path, [video_path], DLCscorername=scorername)
+            deeplabcut.convert_detections2tracklets(config_path, [videos_dir], videotype='.mp4', track_method='box')
+            deeplabcut.refine_tracklets(config_path, pickle_or_h5_path, video_path)
+            tracklets_path = os.path.join(videos_dir, glob.glob(videos_dir+'\*_bx.h5')[0])
+            os.rename(tracklets_path, tracklets_path.replace('_bx',''))
+            deeplabcut.filterpredictions(config_path, [videos_dir], videotype='.mp4')
+            os.rename(tracklets_path.replace('_bx',''), tracklets_path)
+            filtered_path = os.path.join(videos_dir, glob.glob(videos_dir+'\*_filtered.h5')[0])
+            os.rename(filtered_path, filtered_path.replace('_filtered',''))
+            deeplabcut.create_labeled_video(config_path, [videos_dir], videotype='.mp4', draw_skeleton=True)
+            os.rename(filtered_path.replace('_filtered',''), filtered_path)
+            print(what_to_do)
+            answer = input()
+        elif answer == 'r':
+            filtered_path = os.path.join(videos_dir, glob.glob(videos_dir+'\*_filtered.h5')[0])
+            os.rename(filtered_path, filtered_path.replace('_filtered',''))
+            deeplabcut.extract_outlier_frames(config_path, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True)
+            os.rename(filtered_path.replace('_filtered',''), filtered_path)
+            deeplabcut.refine_labels(config_path)
+            print(what_to_do)
+            answer = input()
+        elif answer == 'p'
+            deeplabcut.plot_trajectories(config_path, [videos_dir], videotype='.mp4', track_method='box')
+            #deeplabcut.analyzeskeleton(config_path, [videos_dir], videotype='.mp4', track_method='box')
+            print(what_to_do)
+            answer = input()
+        elif answer == 'm':
+            print('max iterations')
+            iterations = input()
+            deeplabcut.merge_datasets(config_path)
+            deeplabcut.create_multianimaltraining_dataset(config_path, net_type='resnet_50')
+            deeplabcut.train_network(config_path, displayiters=100, maxiters=iterations, allow_growth=True, gputouse=0)
+            deeplabcut.evaluate_network(config_path, gputouse=0, plotting=True)
+            deeplabcut.evaluate_multianimal_crossvalidate(config_path, plotting=True)
+            print(what_to_do)
+            answer = input()
+        elif answer == 'v':
+            new_videos_dir = os.path.join(file_dialog('directory'))
+            deeplabcut.add_new_videos(config_path, [new_videos_dir], copy_videos=False)
+            print(what_to_do)
+            answer = input()
+        else:
+            print('try again')
+            answer = input()
 
-deeplabcut.add_new_videos(config_path, [new_videos_dir], copy_videos=False)
-
-deeplabcut.extract_frames(config_path, mode='automatic', algo='kmeans', userfeedback=False)
-
-deeplabcut.label_frames(config_path)
-
-deeplabcut.create_multianimaltraining_dataset(config_path, net_type='resnet_50')
-
-deeplabcut.train_network(config_path, displayiters=10, maxiters=1000, allow_growth=True, gputouse=0)
-
-deeplabcut.evaluate_network(config_path, gputouse=0, plotting=True)
-
-deeplabcut.evaluate_multianimal_crossvalidate(config_path, plotting=True)
-
-deeplabcut.analyze_videos(config_path, [r'C:\Users\etarter\Downloads\videos2-multianimal'], videotype='.mp4', gputouse=0)
-
-#optional for direct creation of video from detections
-scorername = deeplabcut.analyze_videos(config_path, [r'C:\Users\etarter\Downloads\videos2-multianimal'], videotype='.mp4', gputouse=0)
-video_path = r'full_path_to_video'
-deeplabcut.create_video_with_all_detections(config_path, [video_path], DLCscorername=scorername)
-
-#specify full video path otherwise video from detection raises an error
-#creates _box.pickle file from _full.pickle file from previous step
-video_path = r'full_path_to_video'
-deeplabcut.convert_detections2tracklets(config_path, [video_path], videotype='.mp4', track_method='box')
-
-#refine tracklets in gui over and over again
-#creates .h5 file from .pickle file
-#DOES NOT WORK IN SPYDER KERNEL
-pickle_or_h5_path = r'full_path_to_pickle_or_h5_file'
-video_path = r'full_path_to_video'
-deeplabcut.refine_tracklets(config_path, pickle_or_h5_path, video_path)
-
-#or just skip refinement GUI and convert tracklets directly
-#creates .h5 file from .pickle file
-pickle_path = r'full_path_to_pickle_file'
-deeplabcut.convert_raw_tracks_to_h5(config_path, pickle_path)
-
-#filter data
-#only working if you modify .pickle file to scorername without "_full" or "_box" at the end
-deeplabcut.filterpredictions(config_path, [videos_dir], videotype='.mp4')
-
-#plot trajectories
-#creates directory called plot-poses
-deeplabcut.plot_trajectories(config_path, [videos_dir], videotype='.mp4', track_method='box')
-
-#create labeled video
-#only working if you modify .pickle file to scorername without "_full" or "_box" at the end
-deeplabcut.create_labeled_video(config_path, [videos_dir], videotype='.mp4', draw_skeleton=True)
-
-#extract skeleton bone angles
-#NOT WORKING YET
-deeplabcut.analyzeskeleton(config_path, [videos_dir], videotype='.mp4', track_method='box')
-
-#extract outlier frames
-#only working if you modify .pickle file to scorername without "_full" or "_box" at the end
-deeplabcut.extract_outlier_frames(config_path, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True)
-
-#refine labels
-deeplabcut.refine_labels(config_path)
-
-#merge datasets
-deeplabcut.merge_datasets(config_path)
+config_path, videos_dir = new_project()
+run_workflow(config_path, videos_dir)
