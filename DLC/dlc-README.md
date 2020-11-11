@@ -33,6 +33,12 @@ config_path = deeplabcut.create_new_project('projectname', 'yourname', [videos_d
 ```
 The code automatically modifies following config file parameters: `bodyparts`, `skeleton`, `dotsize` and `batchsize`. Now you can reload the project by specifying the config file path. It is also suggested you specify the video directory path.
 
+New videos can always be added with:
+
+```python
+deeplabcut.add_new_videos(config_path, [new_videos_dir], copy_videos=False)
+```
+
 ### Step 2
 
 Extract frames for labelling:
