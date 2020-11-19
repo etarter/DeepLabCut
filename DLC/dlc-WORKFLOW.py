@@ -74,7 +74,7 @@ def run_workflow(config_path, videos_dir):
             deeplabcut.create_training_dataset(config_path, net_type='resnet_50', augmenter_type='imgaug')
             print('max iterations')
             iterations = input()
-            deeplabcut.train_network(config_path, displayiters=100, maxiters=iterations, allow_growth=True, gputouse=0)
+            deeplabcut.train_network(config_path, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0)
             deeplabcut.evaluate_network(config_path, gputouse=0, plotting=True)
             print(what_to_do)
             answer = input()
