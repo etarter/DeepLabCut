@@ -51,6 +51,8 @@ def new_project():
             config_path = os.path.join(file_dialog('file'))
             videos_dir = os.path.join(file_dialog('directory'))
             loop = False
+        elif answer == 'exit':
+            loop = False
         else:
             print('try again')
             console = input()
@@ -58,7 +60,7 @@ def new_project():
 
 def run_workflow(config_path, videos_dir):
     loop = True
-    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos and create labeled videos\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos'
+    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos and create labeled videos\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(exit) exit'
     print(what_to_do)
     answer = input()
     while loop:
