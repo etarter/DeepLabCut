@@ -52,7 +52,7 @@ def new_project():
             videos_dir = os.path.join(file_dialog('directory'))
             loop = False
         elif answer == 'exit':
-            loop = False
+            loop = True
         else:
             print('try again')
             console = input()
@@ -107,6 +107,8 @@ def run_workflow(config_path, videos_dir):
             deeplabcut.add_new_videos(config_path, [new_videos_dir], copy_videos=False)
             print(what_to_do)
             answer = input()
+        elif answer == 'exit':
+            loop = False
         else:
             print('try again')
             answer = input()

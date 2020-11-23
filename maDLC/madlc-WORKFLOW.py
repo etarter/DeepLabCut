@@ -69,7 +69,7 @@ def run_workflow(config_path, videos_dir):
     answer = input()
     while loop:
         if answer == 'e':
-            deeplabcut.extract_frames(config_path, mode='automatic', algo='kmeans', userfeedback=False)
+            deeplabcut.extract_frames(config_path, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
             print(what_to_do)
             answer = input()
         elif answer == 'l':
