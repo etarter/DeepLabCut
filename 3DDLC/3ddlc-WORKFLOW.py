@@ -3,6 +3,9 @@ import tkinter
 from tkinter import filedialog
 import os
 import glob
+from mpl_toolkits.mplot3d import Axes3D
+import subprocess
+import pandas as pd
 
 def file_dialog(type):
     root = tkinter.Tk()
@@ -15,6 +18,8 @@ def file_dialog(type):
     #root.mainloop()
     if type == 'file':
         path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "select config file")
+    elif type == 'file3d':
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "select config3d file")
     elif type == 'directory':
         path = filedialog.askdirectory(parent=root, initialdir=os.getcwd(), title='select video directory')     #add automatic video directory assignement
     elif type == 'vfile':
@@ -23,48 +28,44 @@ def file_dialog(type):
     return path
 
 def new_project():
-    print('(y/n) do you want to create a new project?')
+    print('(y/n/exit) do you want to create a new project?')
     console = input()
     loop = True
 
     while loop:
         if (console == 'y') or (console == 'yes'):
-            print('enter project name')
+            print('project name')
             project_name = input()
-            print('enter your name')
+            print('your name')
             your_name = input()
-            print('enter batch size')
-            batch = input()
-            print('how many frames to extract')
-            numframes = input()
             print('enter videos directory')
-            videos_dir = os.path.join(file_dialog('directory'))
-            config_path = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
-            config_file = open(config_path, 'r')
-            contents = config_file.read()
-            starting_text = 'individuals:'
-            ending_text = 'cropping: false'
-            to_replace = contents[contents.find(starting_text)+len(starting_text):contents.rfind(ending_text)]
-            new_contents = contents.replace(to_replace, '\n- sheep1\n- sheep2\n- sheep3\nuniquebodyparts: []\nmultianimalbodyparts:\n- head\n- shoulder\n- back\n- dock\nskeleton:\n- - head\n  - shoulder\n- - head\n  - back\n- - head\n  - dock\n- - shoulder\n  - back\n- - shoulder\n  - dock\n- - back\n  - dock\nbodyparts: MULTI!\nstart: 0\nstop: 1\nnumframes2pick: '+str(numframes)+'\n\n    # Plotting configuration\nskeleton_color: black\npcutoff: 0.6\ndotsize: 3\nalphavalue: 0.7\ncolormap: plasma\n\n    # Training,Evaluation and Analysis configuration\nTrainingFraction:\n- 0.95\niteration: 0\ndefault_net_type: resnet_50\ndefault_augmenter: multi-animal-imgaug\nsnapshotindex: -1\nbatch_size: '+str(batch)+'\n\n    # Cropping Parameters (for analysis and outlier frame detection)\n')
-            config_file.close()
-            config_file = open(config_path, 'w')
-            config_file.write(new_contents)
-            config_file.close()
+            #videos_dir = os.path.join(file_dialog('directory'))
+            videos_dir = r'C:\Users\etarter\Downloads\videos'
+            #config_path = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
+            config_path = r'C:\Users\etarter\Downloads\dlc\full3dma-dlc-2020-11-23\config.yaml'
+            #config_path3d = deeplabcut.create_new_project_3d(project_name, your_name, num_cameras=2)
+            config_path3d = r'C:\Users\etarter\Downloads\dlc\full3dma-dlc-2020-11-23-3d\config.yaml'
+            print('edit config files accordingly')
+            subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path])
+            subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
             loop = False
         elif (console == 'n') or (console == 'no'):
-            config_path = os.path.join(file_dialog('file'))
-            videos_dir = os.path.join(file_dialog('directory'))
+            config_path = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23\config.yaml'#os.path.join(file_dialog('file'))
+            config_path3d = r'C:\Users\etarter\Downloads\dlc\full3dma-dlc-2020-11-23-3d\config.yaml'#r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23-3d\config.yaml'#os.path.join(file_dialog('file3d'))
+            videos_dir = r'C:\Users\etarter\Downloads\videos'#os.path.join(file_dialog('directory'))
+            loop = False
+        elif console == 'exit':
             loop = False
         else:
             print('try again')
             console = input()
-    return config_path, videos_dir
+    return config_path, config_path3d, videos_dir
 
-config_path, videos_dir = new_project()
+config_path, config_path3d, videos_dir = new_project()
 
-def run_workflow(config_path, videos_dir):
+def run_workflow(config_path, config_path3d, videos_dir):
     loop = True
-    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos and create labeled videos\n(r) extract outliers and refine labels\n(p) plot poses and analyze skeleton\n(m) merge and retrain network\n(v) add new videos\n(exit) exit'
+    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) calibrate and triangulate\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(exit) exit'
     print(what_to_do)
     answer = input()
     while loop:
@@ -86,28 +87,24 @@ def run_workflow(config_path, videos_dir):
             print(what_to_do)
             answer = input()
         elif answer == 'a':
-            print('batch size')
-            batchsize = input()
-            scorername = deeplabcut.analyze_videos(config_path, [videos_dir], videotype='.mp4', gputouse=0, batchsize=batchsize, save_as_csv=False)
-            #deeplabcut.create_video_with_all_detections(config_path, [video_path], DLCscorername=scorername)
+            scorername = deeplabcut.analyze_videos(config_path, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
             deeplabcut.convert_detections2tracklets(config_path, [videos_dir], videotype='.mp4', track_method='box')
-            man, viz = deeplabcut.refine_tracklets(config_path, os.path.join(videos_dir, glob.glob(videos_dir+'\*_bx.pickle')[0]), os.path.join(file_dialog('vfile')))
-
-            #code stops here and I have no idea why
-
-            deeplabcut.create_labeled_video(config_path, [videos_dir], videotype='.mp4', draw_skeleton=True, track_method='box')
+            videos = range(len(glob.glob(videos_dir+'\*_bx.pickle')))
+            for video in videos:
+                man, viz = deeplabcut.refine_tracklets(config_path, os.path.join(videos_dir, glob.glob(videos_dir+'\*_bx.pickle')[video]), os.path.join(file_dialog('vfile')))
             print(what_to_do)
             answer = input()
+        elif answer == 'c':
+            cams = range(len(glob.glob(videos_dir+'\*_bx.h5')))
+            for cam in cams:
+                ma_h5 = pd.read_hdf(glob.glob(videos_dir+'\*_bx.h5')[cam])
+                sa_h5 = pd.read_hdf(glob.glob(videos_dir+'\hybrid\*_10000.h5')[cam])
+                outfile = os.path.join(videos_dir, os.path.basename(glob.glob(videos_dir+'\hybrid\*_10000.h5')[cam]))
+                ma_h5.columns = sa_h5.columns
+                ma_h5.to_hdf(outfile, key="df_with_missing", mode="w")
+            #calibration and triangulation
         elif answer == 'r':
-            deeplabcut.extract_outlier_frames(config_path, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
-            deeplabcut.refine_labels(config_path)
-            print(what_to_do)
-            answer = input()
-        elif answer == 'p':
-            deeplabcut.plot_trajectories(config_path, [videos_dir], videotype='.mp4', track_method='box')
-            #deeplabcut.analyzeskeleton(config_path, [videos_dir], videotype='.mp4', track_method='box')
-            print(what_to_do)
-            answer = input()
+            print()
         elif answer == 'm':
             print('max iterations')
             iterations = input()
@@ -129,4 +126,4 @@ def run_workflow(config_path, videos_dir):
             print('try again')
             answer = input()
 
-run_workflow(config_path, videos_dir)
+run_workflow(config_path, config_path3d, videos_dir)

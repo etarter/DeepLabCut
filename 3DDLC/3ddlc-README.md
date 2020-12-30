@@ -39,8 +39,8 @@ deeplabcut.check_undistortion(config_path3d, cbrow=5, cbcol=8)
 ### triangulate videos
 This analyzes the video directory with the 2d config file specified in the 3d config file.
 ```python
-video_dir = r'video_folder'
-deeplabcut.triangulate(config_path3d, video_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
+videos_dir = r'video_folder'
+deeplabcut.triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
 ```
 
 ### create labeled 3d videos
