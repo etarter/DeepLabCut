@@ -1,5 +1,6 @@
-import deeplabcutoncrack
 import deeplabcut
+import deeplabcutoncrack
+import undistortoncrack
 import tkinter
 from tkinter import filedialog
 import os
@@ -85,7 +86,7 @@ def new_project():
 
 def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
-    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) calibrate and triangulate\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
+    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) triangulate\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
     print(what_to_do)
     answer = input()
     while loop:
@@ -114,22 +115,23 @@ def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
         elif answer == 'a':
             scorername = deeplabcut.analyze_videos(config_pathma, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
             #deeplabcut.create_video_with_all_detections(config_pathma, [videos_dir], DLCscorername=scorername)
-            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='box')
-            videos = range(len(glob.glob(videos_dir+'\*_bx.pickle')))
+            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
+            videos = range(len(glob.glob(videos_dir+'\*_sk.pickle')))
             for video in videos:
-                man, viz = deeplabcut.refine_tracklets(config_pathma, os.path.join(videos_dir, glob.glob(videos_dir+'\*_bx.pickle')[video]), os.path.join(file_dialog('vfile')))
+                man, viz = deeplabcut.refine_tracklets(config_pathma, os.path.join(videos_dir, glob.glob(videos_dir+'\*_sk.pickle')[video]), os.path.join(file_dialog('vfile')))
             print(what_to_do)
             answer = input()
         elif answer == 'c':
-            cams = range(len(glob.glob(videos_dir+'\*_bx.h5')))
+            cams = range(len(glob.glob(videos_dir+'\*_sk.h5')))
             for cam in cams:
-                ma_h5 = pd.read_hdf(glob.glob(videos_dir+'\*_bx.h5')[cam])
-                sa_h5 = pd.read_hdf(glob.glob(videos_dir+'\hybrid\*_20000.h5')[cam])
-                outfile = os.path.join(videos_dir, os.path.basename(glob.glob(videos_dir+'\hybrid\*_20000.h5')[cam]))
+                ma_h5 = pd.read_hdf(glob.glob(videos_dir+'\*_sk.h5')[cam])
+                sa_h5 = pd.read_hdf(glob.glob(videos_dir+'\\test1\*_10000.h5')[cam])
+                outfile = os.path.join(videos_dir, os.path.basename(glob.glob(videos_dir+'\\test1\*_10000.h5')[cam]))
                 ma_h5.columns = sa_h5.columns
-                ma_h5.fillna(0,  inplace=True)
                 ma_h5.to_hdf(outfile, key="df_with_missing", mode="w")
-            #calibration and triangulation
+            deeplabcutoncrack.triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
+            print(what_to_do)
+            answer = input()
         elif answer == 'r':
             deeplabcut.extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
             deeplabcut.refine_labels(config_pathma)

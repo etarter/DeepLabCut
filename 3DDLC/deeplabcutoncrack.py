@@ -1,3 +1,15 @@
+import undistortoncrack
+
+
+
+"""
+deeplabcut on crack extension for multianimal 3d dlc support
+etarter
+"""
+
+
+
+
 """
 DeepLabCut2.0 Toolbox (deeplabcut.org)
 © A. & M. Mathis Labs
@@ -359,7 +371,6 @@ def triangulate(
                 # For cam1 camera: Assign nans to x and y values of a bodypart where the likelihood for is less than pvalue
                 points_cam1_undistort[low_likelihood_frames] = np.nan, np.nan
                 points_cam1_undistort = np.expand_dims(points_cam1_undistort, axis=1)
-
                 points_cam2_undistort = np.array(
                     [
                         dataFrame_camera2_undistort[scorer_cam2][bp]["x"].values[:],
@@ -371,7 +382,6 @@ def triangulate(
                 # For cam2 camera: Assign nans to x and y values of a bodypart where the likelihood is less than pvalue
                 points_cam2_undistort[low_likelihood_frames] = np.nan, np.nan
                 points_cam2_undistort = np.expand_dims(points_cam2_undistort, axis=1)
-
                 X_l = auxiliaryfunctions_3d.triangulatePoints(
                     P1, P2, points_cam1_undistort, points_cam2_undistort
                 )
@@ -430,10 +440,10 @@ auxiliaryfunctions.SaveData(PredicteData[:nframes,:], metadata, dataname, pdinde
 def undistort_points(config, dataframe, camera_pair, destfolder):
     cfg_3d = auxiliaryfunctions.read_config(config)
     (
-        img_path,
-        path_corners,
-        path_camera_matrix,
-        path_undistort,
+    img_path,
+    path_corners,
+    path_camera_matrix,
+    path_undistort,
     ) = auxiliaryfunctions_3d.Foldernames3Dproject(cfg_3d)
     """
     path_undistort = destfolder
@@ -443,15 +453,25 @@ def undistort_points(config, dataframe, camera_pair, destfolder):
     #currently no interm. saving of this due to high speed.
     # check if the undistorted files are already present
     if os.path.exists(os.path.join(path_undistort,filename_cam1 + '_undistort.h5')) and os.path.exists(os.path.join(path_undistort,filename_cam2 + '_undistort.h5')):
-        print("The undistorted files are already present at %s" % os.path.join(path_undistort,filename_cam1))
-        dataFrame_cam1_undistort = pd.read_hdf(os.path.join(path_undistort,filename_cam1 + '_undistort.h5'))
-        dataFrame_cam2_undistort = pd.read_hdf(os.path.join(path_undistort,filename_cam2 + '_undistort.h5'))
+    print("The undistorted files are already present at %s" % os.path.join(path_undistort,filename_cam1))
+    dataFrame_cam1_undistort = pd.read_hdf(os.path.join(path_undistort,filename_cam1 + '_undistort.h5'))
+    dataFrame_cam2_undistort = pd.read_hdf(os.path.join(path_undistort,filename_cam2 + '_undistort.h5'))
     else:
     """
     if True:
         # Create an empty dataFrame to store the undistorted 2d coordinates and likelihood
         dataframe_cam1 = pd.read_hdf(dataframe[0])
         dataframe_cam2 = pd.read_hdf(dataframe[1])
+
+        sa_cam1 = pd.read_hdf(r'C:\Users\etarter\Downloads\videos\test1\cam1-me-vidDLC_resnet50_test1Jan4shuffle1_10000.h5')
+        sa_cam2 = pd.read_hdf(r'C:\Users\etarter\Downloads\videos\test1\cam2-me-vidDLC_resnet50_test1Jan4shuffle1_10000.h5')
+
+        dataframe_cam1.columns = sa_cam1.columns
+        dataframe_cam2.columns = sa_cam2.columns
+
+        #dataframe_cam1 = sa_cam1
+        #dataframe_cam2 = sa_cam2
+
         scorer_cam1 = dataframe_cam1.columns.get_level_values(0)[0]
         scorer_cam2 = dataframe_cam2.columns.get_level_values(0)[0]
         stereo_file = auxiliaryfunctions.read_pickle(
@@ -497,6 +517,11 @@ def undistort_points(config, dataframe, camera_pair, destfolder):
             )
             points_cam1 = points_cam1.T
             points_cam1 = np.expand_dims(points_cam1, axis=1)
+
+
+            points_cam1 = np.float64(points_cam1)
+
+
             points_cam1_remapped = cv2.undistortPoints(
                 src=points_cam1, cameraMatrix=mtx_l, distCoeffs=dist_l, P=P1, R=R1
             )
@@ -520,6 +545,11 @@ def undistort_points(config, dataframe, camera_pair, destfolder):
             )
             points_cam2 = points_cam2.T
             points_cam2 = np.expand_dims(points_cam2, axis=1)
+
+
+            points_cam2 = np.float64(points_cam2)
+
+
             points_cam2_remapped = cv2.undistortPoints(
                 src=points_cam2, cameraMatrix=mtx_r, distCoeffs=dist_r, P=P2, R=R2
             )
