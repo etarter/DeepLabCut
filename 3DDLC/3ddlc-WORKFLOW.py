@@ -86,7 +86,7 @@ def new_project():
 
 def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
-    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) triangulate\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
+    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) triangulate\n(p) create labeled video\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
     print(what_to_do)
     answer = input()
     while loop:
@@ -132,6 +132,8 @@ def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
             deeplabcutoncrack.triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
             print(what_to_do)
             answer = input()
+        elif answer == 'p':
+            deeplabcut.create_labeled_video_3d(config_path3d, [videos_dir], videotype='.mp4', trailpoints=10, view=[0,270])
         elif answer == 'r':
             deeplabcut.extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
             deeplabcut.refine_labels(config_pathma)
