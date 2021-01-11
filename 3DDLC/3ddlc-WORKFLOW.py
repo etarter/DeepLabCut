@@ -1,6 +1,5 @@
 import deeplabcut
 import deeplabcutoncrack
-import undistortoncrack
 import tkinter
 from tkinter import filedialog
 import os
@@ -134,6 +133,8 @@ def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
             answer = input()
         elif answer == 'p':
             deeplabcut.create_labeled_video_3d(config_path3d, [videos_dir], videotype='.mp4', trailpoints=10, view=[0,270])
+            print(what_to_do)
+            answer = input()
         elif answer == 'r':
             deeplabcut.extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
             deeplabcut.refine_labels(config_pathma)
