@@ -16,6 +16,28 @@ import pandas as pd
 import yaml
 from ruamel.yaml import YAML
 
+import tkinter
+from tkinter import filedialog
+
+def file_dialog(type):
+    root = tkinter.Tk()
+    root.geometry('0x0+0+0')
+    root.lift()
+    root.focus_force()
+    root.deiconify()
+    root.update_idletasks()
+    if type == 'file':
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "config_path")
+    elif type == 'file3d':
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "config_path3d")
+    elif type == 'filema':
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "config_pathma")
+    elif type == 'directory':
+        path = filedialog.askdirectory(parent=root, initialdir=os.getcwd(), title='videos_dir')
+    elif type == 'vfile':
+        path = filedialog.askopenfilename(parent=root, initialdir=os.getcwd(), title='video_path')
+    root.withdraw()
+    return path
 
 def create_config_template(multianimal=False):
     """
