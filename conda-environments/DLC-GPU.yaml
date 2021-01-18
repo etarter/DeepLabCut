@@ -26,5 +26,5 @@ dependencies:
   - nb_conda
   - Shapely
   - pip:
-    - git+https://github.com/etarter/DeepLabCut.git@extension
+    - deeplabcut==2.2b8
     - jedi==0.17.2
