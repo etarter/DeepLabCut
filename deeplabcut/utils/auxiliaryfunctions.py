@@ -39,7 +39,7 @@ def file_dialog(type):
     root.withdraw()
     return path
 
-def run_workflow():
+def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
     what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
     print(what_to_do)
@@ -136,7 +136,7 @@ def workflow(config_path, config_pathma, config_path3d, videos_dir):
             print('error')
             answer = input()
 
-def print_config():
+def print_config(config_path, config_pathma, config_path3d, videos_dir):
     print('videos_dir\t', videos_dir)
     print('config_path\t', config_path)
     print('config_pathma\t', config_pathma)
