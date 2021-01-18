@@ -19,6 +19,7 @@ from ruamel.yaml import YAML
 import tkinter
 from tkinter import filedialog
 import glob
+import deeplabcut
 
 def file_dialog(type):
     root = tkinter.Tk()
