@@ -83,7 +83,10 @@ from deeplabcut.utils import (
     create_video_with_all_detections,
     plot_trajectories,
     auxiliaryfunctions,
+    run_workflow,
+    open_project,
 )
+
 from deeplabcut.utils import (
     convert2_maDLC,
     convertcsv2h5,
