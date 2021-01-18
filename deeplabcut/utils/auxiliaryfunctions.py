@@ -27,17 +27,76 @@ def file_dialog(type):
     root.deiconify()
     root.update_idletasks()
     if type == 'file':
-        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "config_path")
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= 'config_path')
     elif type == 'file3d':
-        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "config_path3d")
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= 'config_path3d')
     elif type == 'filema':
-        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= "config_pathma")
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title= 'config_pathma')
     elif type == 'directory':
         path = filedialog.askdirectory(parent=root, initialdir=os.getcwd(), title='videos_dir')
     elif type == 'vfile':
         path = filedialog.askopenfilename(parent=root, initialdir=os.getcwd(), title='video_path')
     root.withdraw()
     return path
+
+def open_project():
+    print('(n) new project\n(l) load existing')
+    console = input()
+    loop = True
+
+    while loop:
+        if console == 'n':
+            print('project_name')
+            project_name = input()
+            print('your_name')
+            your_name = input()
+            print('videos_dir')
+            videos_dir = os.path.join(file_dialog('directory'))
+            config_path = deeplabcut.create_new_project('sa-'+project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=False)
+            config_pathma = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
+            config_path3d = deeplabcut.create_new_project_3d(project_name, your_name, num_cameras=2)
+            print('edit config files')
+            subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path])
+            subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_pathma])
+            subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
+            loop = False
+        elif console == 'l':
+            model = 'obs'
+            if model == 'hybrid':
+                config_path = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23\config.yaml'#os.path.join(file_dialog('file'))
+                config_path3d = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23-3d\config.yaml'#os.path.join(file_dialog('file3d'))
+                videos_dir = r'C:\Users\etarter\Downloads\videos'
+            elif model == 'full3dma':
+                # full3dma 2d config file must point to hybrid model config file
+                # full3dma 3d config file must have link to hybrid model config file
+                config_path = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23\config.yaml'
+                config_pathma = r'C:\Users\etarter\Downloads\dlc\full3dma-dlc-2020-11-23\config.yaml'
+                config_path3d = r'C:\Users\etarter\Downloads\dlc\full3dma-dlc-2020-11-23-3d\config.yaml'
+                videos_dir = r'C:\Users\etarter\Downloads\videos'
+            elif model == 'test':
+                # test 2d config file must point to test1 model config file
+                # test1 3d config file must have link to test1 model config file
+                config_path = r'C:\Users\etarter\Downloads\dlc\test1-dlc-2021-01-04\config.yaml'
+                config_pathma = r'C:\Users\etarter\Downloads\dlc\test-dlc-2021-01-04\config.yaml'
+                config_path3d = r'C:\Users\etarter\Downloads\dlc\test1-dlc-2021-01-05-3d\config.yaml'
+                videos_dir = r'C:\Users\etarter\Downloads\videos'
+            elif model == 'obs':
+                # test 2d config file must point to test1 model config file
+                # test1 3d config file must have link to test1 model config file
+                config_path = r'C:\deeplabcut\dlc\sa-observation-pdz-2021-01-13\config.yaml'
+                config_pathma = r'C:\deeplabcut\dlc\observation-pdz-2021-01-13\config.yaml'
+                config_path3d = r'C:\deeplabcut\dlc\observation-pdz-2021-01-13-3d\config.yaml'
+                videos_dir = r'C:\deeplabcut\videos\12-01-21-model-creation'
+            elif model == 'ask':
+                config_path = os.path.join(file_dialog('file'))
+                config_pathma = os.path.join(file_dialog('filema'))
+                config_path3d = os.path.join(file_dialog('file3d'))
+                videos_dir = os.path.join(file_dialog('directory'))
+            loop = False
+        else:
+            print('try again')
+            console = input()
+    return config_path, config_pathma, config_path3d, videos_dir
 
 def create_config_template(multianimal=False):
     """
