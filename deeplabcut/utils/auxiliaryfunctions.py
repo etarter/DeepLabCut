@@ -43,7 +43,7 @@ def file_dialog(type):
 
 def run_process(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
-    what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
+    what_to_do = '(p) config paths\n(w) process\n(x) exit'
     print(what_to_do)
     console = input()
     while loop:
@@ -52,7 +52,7 @@ def run_process(config_path, config_pathma, config_path3d, videos_dir):
             print(what_to_do)
             console = input()
         elif console == 'w':
-            workflow(config_path, config_pathma, config_path3d, videos_dir)
+            process(config_path, config_pathma, config_path3d, videos_dir)
             print(what_to_do)
             console = input()
         elif console == 'x':
@@ -61,7 +61,7 @@ def run_process(config_path, config_pathma, config_path3d, videos_dir):
             print('error')
             console = input()
 
-def workflow(config_path, config_pathma, config_path3d, videos_dir):
+def process(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
     what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) triangulate\n(p) create labeled video\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
     print(what_to_do)
