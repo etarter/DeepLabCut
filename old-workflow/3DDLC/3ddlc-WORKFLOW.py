@@ -1,5 +1,4 @@
 import deeplabcut
-import deeplabcutoncrack
 import tkinter
 from tkinter import filedialog
 import os
@@ -7,6 +6,7 @@ import glob
 from mpl_toolkits.mplot3d import Axes3D
 import subprocess
 import pandas as pd
+from pathlib import Path
 
 
 def file_dialog(type):
@@ -30,7 +30,7 @@ def file_dialog(type):
     return path
 
 
-def new_project():
+def open_project():
     print('(n) new project\n(l) load existing')
     console = input()
     loop = True
@@ -43,7 +43,7 @@ def new_project():
             your_name = input()
             print('videos_dir')
             videos_dir = os.path.join(file_dialog('directory'))
-            config_path = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=False)
+            config_path = deeplabcut.create_new_project('sa-'+project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=False)
             config_pathma = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
             config_path3d = deeplabcut.create_new_project_3d(project_name, your_name, num_cameras=2)
             print('edit config files')
@@ -52,7 +52,7 @@ def new_project():
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
             loop = False
         elif console == 'l':
-            model = 'test'
+            model = 'obs'
             if model == 'hybrid':
                 config_path = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23\config.yaml'#os.path.join(file_dialog('file'))
                 config_path3d = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23-3d\config.yaml'#os.path.join(file_dialog('file3d'))
@@ -71,6 +71,13 @@ def new_project():
                 config_pathma = r'C:\Users\etarter\Downloads\dlc\test-dlc-2021-01-04\config.yaml'
                 config_path3d = r'C:\Users\etarter\Downloads\dlc\test1-dlc-2021-01-05-3d\config.yaml'
                 videos_dir = r'C:\Users\etarter\Downloads\videos'
+            elif model == 'obs':
+                # test 2d config file must point to test1 model config file
+                # test1 3d config file must have link to test1 model config file
+                config_path = r'C:\deeplabcut\dlc\sa-observation-pdz-2021-01-13\config.yaml'
+                config_pathma = r'C:\deeplabcut\dlc\observation-pdz-2021-01-13\config.yaml'
+                config_path3d = r'C:\deeplabcut\dlc\observation-pdz-2021-01-13-3d\config.yaml'
+                videos_dir = r'C:\deeplabcut\videos\12-01-21-model-creation'
             elif model == 'ask':
                 config_path = os.path.join(file_dialog('file'))
                 config_pathma = os.path.join(file_dialog('filema'))
@@ -83,7 +90,7 @@ def new_project():
     return config_path, config_pathma, config_path3d, videos_dir
 
 
-def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
+def workflow(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
     what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) triangulate\n(p) create labeled video\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
     print(what_to_do)
@@ -121,14 +128,14 @@ def run_workflow(config_path, config_pathma, config_path3d, videos_dir):
             print(what_to_do)
             answer = input()
         elif answer == 'c':
-            cams = range(len(glob.glob(videos_dir+'\*_sk.h5')))
-            for cam in cams:
-                ma_h5 = pd.read_hdf(glob.glob(videos_dir+'\*_sk.h5')[cam])
-                sa_h5 = pd.read_hdf(glob.glob(videos_dir+'\\test1\*_10000.h5')[cam])
-                outfile = os.path.join(videos_dir, os.path.basename(glob.glob(videos_dir+'\\test1\*_10000.h5')[cam]))
+            vids = range(len(glob.glob(videos_dir+'\*_sk.h5')))
+            for vid in vids:
+                ma_h5 = pd.read_hdf(glob.glob(videos_dir+'\*_sk.h5')[vid])
+                sa_h5 = pd.read_hdf(glob.glob(str(Path(videos_dir).parent.parent)+'\other\*_'+str(iterations)+'.h5')[vid])
+                outfile = os.path.join(videos_dir, os.path.basename(glob.glob(str(Path(videos_dir).parent.parent)+'\other\*'+str(iterations)+'.h5')[vid]))
                 ma_h5.columns = sa_h5.columns
                 ma_h5.to_hdf(outfile, key="df_with_missing", mode="w")
-            deeplabcutoncrack.triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
+            deeplabcut.triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
             print(what_to_do)
             answer = input()
         elif answer == 'p':
@@ -168,23 +175,24 @@ def print_config():
     print('config_path3d\t', config_path3d)
 
 
-config_path, config_pathma, config_path3d, videos_dir = new_project()
+config_path, config_pathma, config_path3d, videos_dir = open_project()
 
-loop = True
-what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
-print(what_to_do)
-console = input()
-while loop:
-    if console == 'p':
-        print_config()
-        print(what_to_do)
-        console = input()
-    elif console == 'w':
-        run_workflow(config_path, config_pathma, config_path3d, videos_dir)
-        print(what_to_do)
-        console = input()
-    elif console == 'x':
-        loop = False
-    else:
-        print('error')
-        console = input()
+def run_workflow():
+    loop = True
+    what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
+    print(what_to_do)
+    console = input()
+    while loop:
+        if console == 'p':
+            print_config()
+            print(what_to_do)
+            console = input()
+        elif console == 'w':
+            workflow(config_path, config_pathma, config_path3d, videos_dir)
+            print(what_to_do)
+            console = input()
+        elif console == 'x':
+            loop = False
+        else:
+            print('error')
+            console = input()
