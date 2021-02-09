@@ -15,7 +15,7 @@
 #
 # install: conda env create -f DLC-GPU.yaml
 # update:  conda env update -f DLC-GPU.yaml
-name: DLC-GPU
+name: DLC-GPU-new
 dependencies:
   - python=3.7
   - pip
@@ -26,4 +26,5 @@ dependencies:
   - nb_conda
   - Shapely
   - pip:
-    - deeplabcut
+    - deeplabcut==2.2b8
+    - jedi==0.17.2

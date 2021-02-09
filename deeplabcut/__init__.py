@@ -57,7 +57,6 @@ else:  # standard use [wxpython supported]
     from deeplabcut.utils.skeleton import SkeletonBuilder
     from deeplabcut.refine_training_dataset.tracklets import refine_tracklets
 
-
 from deeplabcut.create_project import (
     create_new_project,
     create_new_project_3d,
@@ -84,7 +83,10 @@ from deeplabcut.utils import (
     create_video_with_all_detections,
     plot_trajectories,
     auxiliaryfunctions,
+    run_workflow,
+    open_project,
 )
+
 from deeplabcut.utils import (
     convert2_maDLC,
     convertcsv2h5,

@@ -15,6 +15,8 @@ from pathlib import Path
 from deeplabcut import DEBUG
 from deeplabcut.utils.auxfun_videos import VideoReader
 
+def test():
+    print("test complete")
 
 def create_new_project(
     project,
