@@ -1429,9 +1429,9 @@ def convert_detections2tracklets(
                         PAF,
                         partaffinityfield_graph,
                         linkingpartaffinityfield_graph,
-                        lowerbound,
-                        upperbound,
-                        printintermediate,
+                        lowerbound=lowerbound,
+                        upperbound=upperbound,
+                        print_intermediate=printintermediate,
                     )
                     if track_method == "box":
                         # get corresponding bounding boxes!

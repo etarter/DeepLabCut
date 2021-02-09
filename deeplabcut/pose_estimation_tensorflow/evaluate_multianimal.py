@@ -1,5 +1,5 @@
 """
-DeepLabCut2.0 Toolbox (deeplabcut.org)
+DeepLabCut 2.2 Toolbox (deeplabcut.org)
 © A. & M. Mathis Labs
 https://github.com/AlexEMG/DeepLabCut
 
@@ -311,7 +311,9 @@ def evaluate_multianimal_full(
                         for imageindex, imagename in tqdm(enumerate(Data.index)):
                             image_path = os.path.join(cfg["project_path"], imagename)
                             image = io.imread(image_path)
-                            frame = img_as_ubyte(skimage.color.gray2rgb(image))
+                            if image.ndim == 2 or image.shape[-1] == 1:
+                                image = skimage.color.gray2rgb(image)
+                            frame = img_as_ubyte(image)
 
                             GT = Data.iloc[imageindex]
                             df = GT.unstack("coords").reindex(joints, level='bodyparts')
@@ -321,11 +323,12 @@ def evaluate_multianimal_full(
                             xy = temp.values.reshape((-1, 2, temp.shape[1])).swapaxes(
                                 1, 2
                             )
-                            edges = xy[:, dlc_cfg["partaffinityfield_graph"]]
-                            lengths = np.sum(
-                                (edges[:, :, 0] - edges[:, :, 1]) ** 2, axis=2
-                            )
-                            distnorm[imageindex] = np.nanmax(lengths)
+                            if dlc_cfg['partaffinityfield_predict']:
+                                edges = xy[:, dlc_cfg["partaffinityfield_graph"]]
+                                lengths = np.sum(
+                                    (edges[:, :, 0] - edges[:, :, 1]) ** 2, axis=2
+                                )
+                                distnorm[imageindex] = np.nanmax(lengths)
 
                             # FIXME Is having an empty array vs nan really that necessary?!
                             groundtruthidentity = list(
