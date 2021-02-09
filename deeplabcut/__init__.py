@@ -83,7 +83,7 @@ from deeplabcut.utils import (
     create_video_with_all_detections,
     plot_trajectories,
     auxiliaryfunctions,
-    run_workflow,
+    run_process,
     open_project,
 )
 
