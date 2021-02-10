@@ -48,7 +48,7 @@ def run_process(config_path, config_pathma, config_path3d, videos_dir):
     console = input()
     while loop:
         if console == 'p':
-            print_config()
+            print_config(config_path, config_pathma, config_path3d, videos_dir)
             print(what_to_do)
             console = input()
         elif console == 'w':
