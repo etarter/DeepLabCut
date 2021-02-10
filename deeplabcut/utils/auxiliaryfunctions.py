@@ -139,10 +139,10 @@ def process(config_path, config_pathma, config_path3d, videos_dir):
             answer = input()
 
 def print_config(config_path, config_pathma, config_path3d, videos_dir):
-    print('videos_dir\t', videos_dir)
     print('config_path\t', config_path)
     print('config_pathma\t', config_pathma)
     print('config_path3d\t', config_path3d)
+    print('videos_dir\t', videos_dir)
 
 def open_project():
     print('(n) new project\n(l) load existing')

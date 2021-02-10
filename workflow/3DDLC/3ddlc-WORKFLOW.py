@@ -97,7 +97,7 @@ def open_project():
     return config_path, config_pathma, config_path3d, videos_dir
 
 
-def workflow(config_path, config_pathma, config_path3d, videos_dir):
+def process(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
     what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(c) triangulate\n(p) create labeled video\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit'
     print(what_to_do)
@@ -176,15 +176,14 @@ def workflow(config_path, config_pathma, config_path3d, videos_dir):
 
 
 def print_config():
-    print('videos_dir\t', videos_dir)
     print('config_path\t', config_path)
     print('config_pathma\t', config_pathma)
     print('config_path3d\t', config_path3d)
-
+    print('videos_dir\t', videos_dir)
 
 config_path, config_pathma, config_path3d, videos_dir = open_project()
 
-def run_workflow():
+def run_process():
     loop = True
     what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
     print(what_to_do)
@@ -195,7 +194,7 @@ def run_workflow():
             print(what_to_do)
             console = input()
         elif console == 'w':
-            workflow(config_path, config_pathma, config_path3d, videos_dir)
+            process(config_path, config_pathma, config_path3d, videos_dir)
             print(what_to_do)
             console = input()
         elif console == 'x':
