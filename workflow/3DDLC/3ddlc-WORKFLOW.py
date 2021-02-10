@@ -52,7 +52,7 @@ def open_project():
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
             loop = False
         elif console == 'l':
-            model = 'obs'
+            model = 'calib'
             if model == 'hybrid':
                 config_path = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23\config.yaml'#os.path.join(file_dialog('file'))
                 config_path3d = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23-3d\config.yaml'#os.path.join(file_dialog('file3d'))
@@ -77,6 +77,13 @@ def open_project():
                 config_path = r'C:\deeplabcut\dlc\sa-observation-pdz-2021-01-13\config.yaml'
                 config_pathma = r'C:\deeplabcut\dlc\observation-pdz-2021-01-13\config.yaml'
                 config_path3d = r'C:\deeplabcut\dlc\observation-pdz-2021-01-13-3d\config.yaml'
+                videos_dir = r'C:\deeplabcut\videos\12-01-21-model-creation'
+            elif model == 'calib':
+                # test 2d config file must point to test1 model config file
+                # test1 3d config file must have link to test1 model config file
+                config_path = r'C:\Users\etarter\Downloads\dlc\sa-calib-dlc-2021-02-10\config.yaml'
+                config_pathma = r'C:\Users\etarter\Downloads\dlc\calib-dlc-2021-02-10\config.yaml'
+                config_path3d = r'C:\Users\etarter\Downloads\dlc\calib-dlc-2021-02-10-3d\config.yaml'
                 videos_dir = r'C:\deeplabcut\videos\12-01-21-model-creation'
             elif model == 'ask':
                 config_path = os.path.join(file_dialog('file'))

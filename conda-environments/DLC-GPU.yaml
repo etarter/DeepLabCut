@@ -26,5 +26,5 @@ dependencies:
   - nb_conda
   - Shapely
   - pip:
-    - deeplabcut==2.2b8
+    - C:\Users\etarter\Documents\Repositories\DeepLabCut
     - jedi==0.17.2
