@@ -84,7 +84,7 @@ def open_project():
                 config_path = r'C:\Users\etarter\Downloads\dlc\sa-calib-dlc-2021-02-10\config.yaml'
                 config_pathma = r'C:\Users\etarter\Downloads\dlc\calib-dlc-2021-02-10\config.yaml'
                 config_path3d = r'C:\Users\etarter\Downloads\dlc\calib-dlc-2021-02-10-3d\config.yaml'
-                videos_dir = r'C:\deeplabcut\videos\12-01-21-model-creation'
+                videos_dir = r'C:\Users\etarter\Downloads\videos-new'
             elif model == 'ask':
                 config_path = os.path.join(file_dialog('file'))
                 config_pathma = os.path.join(file_dialog('filema'))
