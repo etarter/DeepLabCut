@@ -175,7 +175,7 @@ def process(config_path, config_pathma, config_path3d, videos_dir):
             answer = input()
 
 
-def print_config():
+def print_config(config_path, config_pathma, config_path3d, videos_dir):
     print('config_path\t', config_path)
     print('config_pathma\t', config_pathma)
     print('config_path3d\t', config_path3d)
@@ -183,7 +183,7 @@ def print_config():
 
 config_path, config_pathma, config_path3d, videos_dir = open_project()
 
-def run_process():
+def run_process(config_path, config_pathma, config_path3d, videos_dir):
     loop = True
     what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
     print(what_to_do)
@@ -202,3 +202,5 @@ def run_process():
         else:
             print('error')
             console = input()
+
+run_process(config_path, config_pathma, config_path3d, videos_dir)
