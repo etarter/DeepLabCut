@@ -17,6 +17,7 @@ from deeplabcut.gui.evaluate_network import *
 from deeplabcut.gui.extract_frames import *
 from deeplabcut.gui.extract_outlier_frames import *
 from deeplabcut.gui.label_frames import *
+from deeplabcut.gui.human_performance import *
 from deeplabcut.gui.load_project import *
 from deeplabcut.gui.media import *
 from deeplabcut.gui.refine_labels import *
