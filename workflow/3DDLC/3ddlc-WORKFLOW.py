@@ -8,6 +8,8 @@ import subprocess
 import pandas as pd
 from pathlib import Path
 
+#change everything to a class
+
 
 def file_dialog(type):
     root = tkinter.Tk()
@@ -51,7 +53,7 @@ def open_project():
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_pathma])
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
             loop = False
-        elif console == 'l':
+        elif console == 'l': #change that user is asked which project he wants to load
             model = 'obs'
             if model == 'hybrid':
                 config_path = r'C:\Users\etarter\Downloads\dlc\hybrid-dlc-2020-11-23\config.yaml'#os.path.join(file_dialog('file'))
@@ -125,7 +127,7 @@ def process(config_path, config_pathma, config_path3d, videos_dir):
             deeplabcut.evaluate_multianimal_crossvalidate(config_pathma, pbounds=pbounds, target='pck_test')
             print(what_to_do)
             answer = input()
-        elif answer == 'a':
+        elif answer == 'a': #change if user wants to analyze one video only
             scorername = deeplabcut.analyze_videos(config_pathma, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
             #deeplabcut.create_video_with_all_detections(config_pathma, [videos_dir], DLCscorername=scorername)
             deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
@@ -164,7 +166,7 @@ def process(config_path, config_pathma, config_path3d, videos_dir):
             print(what_to_do)
             answer = input()
         elif answer == 'v':
-            new_videos_dir = os.path.join(file_dialog('directory'))
+            new_videos_dir = os.path.join(file_dialog('vfile'))
             deeplabcut.add_new_videos(config_pathma, [new_videos_dir], copy_videos=False)
             print(what_to_do)
             answer = input()
