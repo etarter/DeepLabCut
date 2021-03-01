@@ -1,2 +1,0 @@
-C:\Users\etarter\Documents\Repositories\DeepLabCut
-jedi==0.17.2

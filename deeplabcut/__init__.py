@@ -124,6 +124,7 @@ from deeplabcut.pose_estimation_3d import (
     calibrate_cameras,
     check_undistortion,
     triangulate,
+    undistort_points,
     create_labeled_video_3d,
 )
 
