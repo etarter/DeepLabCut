@@ -13,8 +13,8 @@
 #
 # Suggested by Jan Eglinger see https://github.com/AlexEMG/DeepLabCut/issues/112
 #
-# install: conda env create -f DLC-GPU.yaml
-# update:  conda env update -f DLC-GPU.yaml
+# install: conda env create -f C:\Users\etarter\Documents\Repositories\DeepLabCut\conda-environments\DLC-GPU.yaml
+# update:  conda env update -f C:\Users\etarter\Documents\Repositories\DeepLabCut\conda-environments\DLC-GPU.yaml
 name: DLC-GPU
 dependencies:
   - python=3.7

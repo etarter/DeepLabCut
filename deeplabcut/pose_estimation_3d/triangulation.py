@@ -461,17 +461,6 @@ def undistort_points(config, dataframe, camera_pair, destfolder):
         dataframe_cam1 = pd.read_hdf(dataframe[0])
         dataframe_cam2 = pd.read_hdf(dataframe[1])
 
-        #CHANGE TO NEW PATH
-
-        sa_cam1 = pd.read_hdf(r'X:\02_Projects\2019_SheepStudy\chronic\deeplabcut\other\cam1-me-vidDLC_resnet50_observation-saJan13shuffle1_50000.h5')
-        sa_cam2 = pd.read_hdf(r'X:\02_Projects\2019_SheepStudy\chronic\deeplabcut\other\cam2-me-vidDLC_resnet50_observation-saJan13shuffle1_50000.h5')
-
-        dataframe_cam1.columns = sa_cam1.columns
-        dataframe_cam2.columns = sa_cam2.columns
-
-        #dataframe_cam1 = sa_cam1
-        #dataframe_cam2 = sa_cam2
-
         scorer_cam1 = dataframe_cam1.columns.get_level_values(0)[0]
         scorer_cam2 = dataframe_cam2.columns.get_level_values(0)[0]
         stereo_file = auxiliaryfunctions.read_pickle(
