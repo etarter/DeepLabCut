@@ -9,6 +9,42 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+
+def workflow():
+
+    config_pathma, config_path3d, videos_dir = open_project()
+
+    loop = True
+    what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
+    print(what_to_do)
+    console = input()
+
+    while loop:
+        if console == 'p':
+            print_config(config_pathma, config_path3d, videos_dir)
+            print(what_to_do)
+            console = input()
+
+        elif console == 'w':
+            process(config_pathma, config_path3d, videos_dir)
+            print(what_to_do)
+            console = input()
+
+        elif console == 'x':
+            loop = False
+
+        else:
+            print('error')
+            console = input()
+
+
+def print_config(config_pathma, config_path3d, videos_dir):
+
+    print('config_pathma\t', config_pathma)
+    print('config_path3d\t', config_path3d)
+    print('videos_dir\t', videos_dir)
+
+
 def file_dialog(type, text):
 
     root = tkinter.Tk()
@@ -40,8 +76,8 @@ def open_project():
             your_name = input()
             print('videos_dir')
             videos_dir = os.path.join(file_dialog('dir', 'select video directory'))
-            config_pathma = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
-            config_path3d = deeplabcut.create_new_project_3d(project_name, your_name, num_cameras=2)
+            config_pathma = create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
+            config_path3d = create_new_project_3d(project_name, your_name, num_cameras=2)
             print('edit config files')
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_pathma])
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
@@ -76,33 +112,33 @@ def process(config_pathma, config_path3d, videos_dir):
 
     while loop:
         if answer == 'e':
-            deeplabcut.extract_frames(config_pathma, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
+            extract_frames(config_pathma, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
             answer = input(what_to_do)
 
         elif answer == 'l':
-            deeplabcut.label_frames(config_pathma)
+            label_frames(config_pathma)
             answer = input(what_to_do)
 
         elif answer == 't':
-            deeplabcut.create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
+            create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
             iterations = input('max iterations: ')
             save_iterations = input('save iterations: ')
-            deeplabcut.train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0, saveiters=save_iterations)
-            deeplabcut.evaluate_network(config_pathma, gputouse=0, plotting=True)
+            train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0, saveiters=save_iterations)
+            evaluate_network(config_pathma, gputouse=0, plotting=True)
             pbounds = {
                         'pafthreshold': (0.05, 0.7),
                         'detectionthresholdsquare': (0, 0.9),
                         'minimalnumberofconnections': (1, 6),
                     }
-            deeplabcut.evaluate_multianimal_crossvalidate(config_pathma, pbounds=pbounds, target='rpck_test')
+            evaluate_multianimal_crossvalidate(config_pathma, pbounds=pbounds, target='rpck_test')
             answer = input(what_to_do)
 
         elif answer == 'a':
-            deeplabcut.analyze_videos(config_pathma, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
+            analyze_videos(config_pathma, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
             answer = input(what_to_do)
 
         elif answer == 'rt':
-            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
+            convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
             pickles = glob(videos_dir+'/*_sk.pickle')
             pickles.sort()
             videos = glob(videos_dir+'/*.mp4')
@@ -110,22 +146,22 @@ def process(config_pathma, config_path3d, videos_dir):
             shape = range(len(pickles))
 
             for i in shape:
-                man, viz = deeplabcut.refine_tracklets(config_pathma, pickles[i], videos[i])
+                man, viz = refine_tracklets(config_pathma, pickles[i], videos[i])
 
             answer = input(what_to_do)
 
         elif answer == 'dt':
-            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
+            convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
             pickles = glob(videos_dir+'/*_sk.pickle')
             shape = range(len(pickles))
 
             for i in shape:
-                deeplabcut.convert_raw_tracks_to_h5(config_pathma, pickles[i])
+                convert_raw_tracks_to_h5(config_pathma, pickles[i])
 
             answer = input(what_to_do)
 
         elif answer == 'f':
-            deeplabcut.filterpredictions(config_pathma, [videos_dir], videotype='.mp4', filtertype='arima', track_method='skeleton', save_as_csv=False)
+            filterpredictions(config_pathma, [videos_dir], videotype='.mp4', filtertype='arima', track_method='skeleton', save_as_csv=False)
             answer = input(what_to_do)
 
         elif answer == 'c':
@@ -150,7 +186,7 @@ def process(config_pathma, config_path3d, videos_dir):
             except AttributeError:
                 print('files already modified!')
 
-            deeplabcut.triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
+            triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
             vids_3d = glob(videos_dir+'/*3D.h5')
 
             for vid_3d in vids_3d:
@@ -175,27 +211,26 @@ def process(config_pathma, config_path3d, videos_dir):
             answer = input(what_to_do)
 
         elif answer == 'p':
-            deeplabcut.create_labeled_video_3d(config_path3d, [videos_dir], videotype='.mp4', trailpoints=10, view=[0,270])
+            create_labeled_video_3d(config_path3d, [videos_dir], videotype='.mp4', trailpoints=10, view=[0,270])
             answer = input(what_to_do)
 
         elif answer == 'r':
-            deeplabcut.extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
-            deeplabcut.refine_labels(config_pathma)
+            extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
+            refine_labels(config_pathma)
             answer = input(what_to_do)
 
         elif answer == 'm':
-            print('max iterations')
-            iterations = input()
-            deeplabcut.merge_datasets(config_pathma)
-            deeplabcut.create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
-            deeplabcut.train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0)
-            deeplabcut.evaluate_network(config_pathma, gputouse=0, plotting=True)
-            deeplabcut.evaluate_multianimal_crossvalidate(config_pathma, plotting=True)
+            iterations = input('max iterations: ')
+            merge_datasets(config_pathma)
+            create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
+            train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0)
+            evaluate_network(config_pathma, gputouse=0, plotting=True)
+            evaluate_multianimal_crossvalidate(config_pathma, plotting=True)
             answer = input(what_to_do)
 
         elif answer == 'v':
             new_videos_dir = os.path.join(file_dialog('f', 'select video file'))
-            deeplabcut.add_new_videos(config_pathma, [new_videos_dir], copy_videos=False)
+            add_new_videos(config_pathma, [new_videos_dir], copy_videos=False)
             answer = input(what_to_do)
 
         elif answer == 'x':
@@ -203,39 +238,3 @@ def process(config_pathma, config_path3d, videos_dir):
 
         else:
             answer = input('error: ')
-
-
-def print_config(config_pathma, config_path3d, videos_dir):
-
-    print('config_pathma\t', config_pathma)
-    print('config_path3d\t', config_path3d)
-    print('videos_dir\t', videos_dir)
-
-config_pathma, config_path3d, videos_dir = open_project()
-
-def run_process(config_pathma, config_path3d, videos_dir):
-
-    loop = True
-    what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
-    print(what_to_do)
-    console = input()
-
-    while loop:
-        if console == 'p':
-            print_config(config_pathma, config_path3d, videos_dir)
-            print(what_to_do)
-            console = input()
-
-        elif console == 'w':
-            process(config_pathma, config_path3d, videos_dir)
-            print(what_to_do)
-            console = input()
-
-        elif console == 'x':
-            loop = False
-
-        else:
-            print('error')
-            console = input()
-
-run_process(config_pathma, config_path3d, videos_dir)

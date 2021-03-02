@@ -132,5 +132,8 @@ from deeplabcut.refine_training_dataset.tracklets import convert_raw_tracks_to_h
 from deeplabcut.refine_training_dataset import extract_outlier_frames, merge_datasets
 from deeplabcut.post_processing import filterpredictions, analyzeskeleton
 
+from deeplabcut.workflow import (
+    workflow,
+)
 
 from deeplabcut.version import __version__, VERSION
