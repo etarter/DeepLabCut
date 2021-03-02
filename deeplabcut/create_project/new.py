@@ -226,11 +226,11 @@ def create_new_project(
     )  # batch size during inference (video - analysis); see https://www.biorxiv.org/content/early/2018/10/30/457242
     cfg_file["corner2move2"] = (50, 50)
     cfg_file["move2corner"] = True
-    cfg_file["skeleton_color"] = "black"
+    cfg_file["skeleton_color"] = "white"
     cfg_file["pcutoff"] = 0.6
-    cfg_file["dotsize"] = 12  # for plots size of dots
-    cfg_file["alphavalue"] = 0.7  # for plots transparency of markers
-    cfg_file["colormap"] = "plasma"  # for plots type of colormap
+    cfg_file["dotsize"] = 5  # for plots size of dots
+    cfg_file["alphavalue"] = 0.5  # for plots transparency of markers
+    cfg_file["colormap"] = "gist_rainbow"  # for plots type of colormap
 
     projconfigfile = os.path.join(str(project_path), "config.yaml")
     # Write dictionary to yaml  config file

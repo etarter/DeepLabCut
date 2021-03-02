@@ -87,12 +87,12 @@ def create_new_project_3d(project, experimenter, num_cameras=2, working_director
     cfg_file_3d["project_path"] = str(project_path)
     #    cfg_file_3d['config_files']= [str('Enter the path of the config file ')+str(i)+ ' to include' for i in range(1,3)]
     #    cfg_file_3d['config_files']= ['Enter the path of the config file 1']
-    cfg_file_3d["colormap"] = "jet"
-    cfg_file_3d["dotsize"] = 15
-    cfg_file_3d["alphaValue"] = 0.8
+    cfg_file_3d["colormap"] = "gist_rainbow"
+    cfg_file_3d["dotsize"] = 5
+    cfg_file_3d["alphaValue"] = 0.5
     cfg_file_3d["markerType"] = "*"
     cfg_file_3d["markerColor"] = "r"
-    cfg_file_3d["pcutoff"] = 0.4
+    cfg_file_3d["pcutoff"] = 0.6
     cfg_file_3d["num_cameras"] = num_cameras
     cfg_file_3d["camera_names"] = [
         str("camera-" + str(i)) for i in range(1, num_cameras + 1)
@@ -105,7 +105,7 @@ def create_new_project_3d(project, experimenter, num_cameras=2, working_director
         ["bodypart3", "bodypart4"],
         ["bodypart4", "bodypart5"],
     ]
-    cfg_file_3d["skeleton_color"] = "black"
+    cfg_file_3d["skeleton_color"] = "white"
 
     for i in range(num_cameras):
         path = str(

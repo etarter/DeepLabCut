@@ -1,4 +1,3 @@
-import deeplabcut
 import tkinter
 from tkinter import filedialog
 import os
@@ -15,57 +14,39 @@ def workflow():
     config_pathma, config_path3d, videos_dir = open_project()
 
     loop = True
-    what_to_do = '(p) config paths\n(w) workflow\n(x) exit'
-    print(what_to_do)
-    console = input()
+    menu_1_0 = ['',
+                '(p) config paths',
+                '(w) workflow',
+                '(x) exit',
+                '\n']
+    console = input('\n'.join(menu_1_0))
 
     while loop:
         if console == 'p':
             print_config(config_pathma, config_path3d, videos_dir)
-            print(what_to_do)
-            console = input()
+            console = input('\n'.join(menu_1_0))
 
         elif console == 'w':
             process(config_pathma, config_path3d, videos_dir)
-            print(what_to_do)
-            console = input()
+            console = input('\n'.join(menu_1_0))
 
         elif console == 'x':
             loop = False
 
         else:
-            print('error')
-            console = input()
+            print('error\n')
+            console = input('\n'.join(menu_1_0))
 
-
-def print_config(config_pathma, config_path3d, videos_dir):
-
-    print('config_pathma\t', config_pathma)
-    print('config_path3d\t', config_path3d)
-    print('videos_dir\t', videos_dir)
-
-
-def file_dialog(type, text):
-
-    root = tkinter.Tk()
-    root.geometry('0x0+0+0')
-    root.lift()
-    root.focus_force()
-    root.deiconify()
-    root.update_idletasks()
-    if type == 'f':
-        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title=text)
-    elif type == 'dir':
-        path = filedialog.askdirectory(parent=root, initialdir=os.getcwd(), title=text)
-    root.withdraw()
-
-    return path
+    return config_pathma, config_path3d, videos_dir
 
 
 def open_project():
 
-    print('(n) new project\n(l) load existing')
-    console = input()
+    menu_0_0 = ['',
+                '(n) new project', # todo add automatic 3d config file skeleton creation
+                '(l) load project',
+                '\n']
+    console = input('\n'.join(menu_0_0))
     loop = True
 
     while loop:
@@ -84,58 +65,89 @@ def open_project():
             loop = False
 
         elif console == 'l':
-            model = 'test'
+            loop = True
+            menu_0_1 = ['',
+                        '(n) load new',
+                        '(l) load existing',
+                        '\n']
+            model = input('\n'.join(menu_0_1))
 
-            if model == 'test':
-                config_pathma = r'C:\Users\etarter\Downloads\dlc\test-dlc-2021-01-04\config.yaml'
-                config_path3d = r'C:\Users\etarter\Downloads\dlc\test1-dlc-2021-01-05-3d\config.yaml'
-                videos_dir = r'C:\Users\etarter\Downloads\videos'
+            while loop:
+                if model == 'l':
+                    config_pathma = r'C:\Users\etarter\Downloads\dlc\test-dlc-2021-01-04\config.yaml'
+                    config_path3d = r'C:\Users\etarter\Downloads\dlc\test1-dlc-2021-01-05-3d\config.yaml'
+                    videos_dir = r'C:\Users\etarter\Downloads\videos'
+                    loop = False
 
-            elif model == 'ask':
-                config_pathma = os.path.join(file_dialog('f', 'select multianimal config file'))
-                config_path3d = os.path.join(file_dialog('f', 'select 3d config file'))
-                videos_dir = os.path.join(file_dialog('dir', 'select videos dir'))
-            loop = False
+                elif model == 'n':
+                    config_pathma = os.path.join(file_dialog('f', 'select multianimal config file'))
+                    config_path3d = os.path.join(file_dialog('f', 'select 3d config file'))
+                    videos_dir = os.path.join(file_dialog('dir', 'select videos dir'))
+                    loop = False
+
+                else:
+                    print('error\n')
+                    model = input('\n'.join(menu_0_1))
 
         else:
-            print('try again')
-            console = input()
+            print('error\n')
+            console = input('\n'.join(menu_0_0))
 
     return config_pathma, config_path3d, videos_dir
 
 
 def process(config_pathma, config_path3d, videos_dir):
 
+    menu_2_0 = ['',
+                'main functions\n',
+                '(ef) extract frames',
+                '(lf) label frames',
+                '(tn) create, train and evaluate network',
+                '(cv) cross-validate tracking parameters', # todo: add more parameters and bounds
+                '(av) analyze videos', # todo: select track method
+                '(rt) refine tracklets',
+                '(fp) filter predictions', # todo: select filter type
+                '(tp) triangulate',
+                '\nextra functions\n',
+                '(cc) calibrate cameras', # todo: automatic directory opening to check for extracted corners
+                '(dt) convert detections to tracklets',
+                '(lv) create labeled video', # todo: select 2d or 3d labeled video
+                '(eo) extract and refine outlier frames',
+                '(mn) retrain network',
+                '(nv) add new videos', # todo: test this for video or directory only?
+                '\n(x) exit',
+                '\n']
+    answer = input('\n'.join(menu_2_0))
     loop = True
-    what_to_do = '(e) extract frames\n(l) label frames\n(t) create, train and evaluate network \n(a) analyze videos\n(rt) refine tracklets or (dt) convert detections to tracklets\n(f) filter predictions\n(c) triangulate\n(p) create labeled video\n(r) extract outliers and refine labels\n(m) merge and retrain network\n(v) add new videos\n(x) exit\n'
-    answer = input(what_to_do)
 
     while loop:
-        if answer == 'e':
+        if answer == 'ef':
             extract_frames(config_pathma, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'l':
+        elif answer == 'lf':
             label_frames(config_pathma)
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 't':
+        elif answer == 'tn':
             create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
             iterations = input('max iterations: ')
             save_iterations = input('save iterations: ')
             train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0, saveiters=save_iterations)
             evaluate_network(config_pathma, gputouse=0, plotting=True)
+
+        elif answer == 'cv':
             pbounds = {
                         'pafthreshold': (0.05, 0.7),
                         'detectionthresholdsquare': (0, 0.9),
                         'minimalnumberofconnections': (1, 6),
                     }
             evaluate_multianimal_crossvalidate(config_pathma, pbounds=pbounds, target='rpck_test')
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'a':
+        elif answer == 'av':
             analyze_videos(config_pathma, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
         elif answer == 'rt':
             convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
@@ -148,7 +160,7 @@ def process(config_pathma, config_path3d, videos_dir):
             for i in shape:
                 man, viz = refine_tracklets(config_pathma, pickles[i], videos[i])
 
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
         elif answer == 'dt':
             convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
@@ -158,13 +170,13 @@ def process(config_pathma, config_path3d, videos_dir):
             for i in shape:
                 convert_raw_tracks_to_h5(config_pathma, pickles[i])
 
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'f':
+        elif answer == 'fp':
             filterpredictions(config_pathma, [videos_dir], videotype='.mp4', filtertype='arima', track_method='skeleton', save_as_csv=False)
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'c':
+        elif answer == 'tp':
             try:
                 vids = glob(videos_dir+'/*_filtered.h5')
 
@@ -208,33 +220,50 @@ def process(config_pathma, config_path3d, videos_dir):
                 tracking_file_3d.columns = columns_3d_syn
                 tracking_file_3d.to_hdf(outfile_3d+'_synthetic.h5', key="df_with_missing", mode="w")
 
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'p':
+        elif answer == 'lv':
             create_labeled_video_3d(config_path3d, [videos_dir], videotype='.mp4', trailpoints=10, view=[0,270])
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'r':
+        elif answer == 'eo':
             extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
             refine_labels(config_pathma)
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
-        elif answer == 'm':
-            iterations = input('max iterations: ')
+        elif answer == 'mn':
             merge_datasets(config_pathma)
-            create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
-            train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0)
-            evaluate_network(config_pathma, gputouse=0, plotting=True)
-            evaluate_multianimal_crossvalidate(config_pathma, plotting=True)
-            answer = input(what_to_do)
+            answer = 'tn'
 
-        elif answer == 'v':
+        elif answer == 'nv':
             new_videos_dir = os.path.join(file_dialog('f', 'select video file'))
             add_new_videos(config_pathma, [new_videos_dir], copy_videos=False)
-            answer = input(what_to_do)
+            answer = input('\n'.join(menu_2_0))
 
         elif answer == 'x':
             loop = False
 
         else:
             answer = input('error: ')
+
+
+def print_config(config_pathma, config_path3d, videos_dir):
+
+    print('\nconfig_pathma\t', config_pathma, '\nconfig_path3d\t', config_path3d, '\nvideos_dir\t', videos_dir)
+
+
+def file_dialog(type, text):
+
+    root = tkinter.Tk()
+    root.geometry('0x0+0+0')
+    root.lift()
+    root.focus_force()
+    root.deiconify()
+    root.update_idletasks()
+    if type == 'f':
+        path = filedialog.askopenfilename(parent=root, initialdir= os.getcwd(), title=text)
+    elif type == 'dir':
+        path = filedialog.askdirectory(parent=root, initialdir=os.getcwd(), title=text)
+    root.withdraw()
+
+    return path
