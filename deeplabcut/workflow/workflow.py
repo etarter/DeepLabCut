@@ -1,3 +1,4 @@
+import deeplabcut
 import tkinter
 from tkinter import filedialog
 import os
@@ -11,7 +12,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def workflow():
 
-    config_pathma, config_path3d, videos_dir = open_project()
+    config_pathma, config_path3d, videos_dir, video_type = open_project()
 
     loop = True
     menu_1_0 = ['',
@@ -51,14 +52,12 @@ def open_project():
 
     while loop:
         if console == 'n':
-            print('project_name')
-            project_name = input()
-            print('your_name')
-            your_name = input()
-            print('videos_dir')
+            project_name = input('project name: ')
+            your_name = input('your name: ')
+            video_type = input('video type: ')
             videos_dir = os.path.join(file_dialog('dir', 'select video directory'))
-            config_pathma = create_new_project(project_name, your_name, [videos_dir], videotype='.mp4', copy_videos=False, multianimal=True)
-            config_path3d = create_new_project_3d(project_name, your_name, num_cameras=2)
+            config_pathma = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype=video_type, copy_videos=False, multianimal=True)
+            config_path3d = deeplabcut.create_new_project_3d(project_name, your_name, num_cameras=2)
             print('edit config files')
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_pathma])
             subprocess.call([r'C:\Users\etarter\AppData\Local\atom\atom.exe', config_path3d])
@@ -93,10 +92,10 @@ def open_project():
             print('error\n')
             console = input('\n'.join(menu_0_0))
 
-    return config_pathma, config_path3d, videos_dir
+    return config_pathma, config_path3d, videos_dir, video_type
 
 
-def process(config_pathma, config_path3d, videos_dir):
+def process(config_pathma, config_path3d, videos_dir, video_type):
 
     menu_2_0 = ['',
                 'main functions\n',
@@ -122,19 +121,19 @@ def process(config_pathma, config_path3d, videos_dir):
 
     while loop:
         if answer == 'ef':
-            extract_frames(config_pathma, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
+            deeplabcut.extract_frames(config_pathma, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'lf':
-            label_frames(config_pathma)
+            deeplabcut.label_frames(config_pathma)
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'tn':
-            create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
+            deeplabcut.create_multianimaltraining_dataset(config_pathma, net_type='resnet_50')
             iterations = input('max iterations: ')
             save_iterations = input('save iterations: ')
-            train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0, saveiters=save_iterations)
-            evaluate_network(config_pathma, gputouse=0, plotting=True)
+            deeplabcut.train_network(config_pathma, displayiters=10, maxiters=iterations, allow_growth=True, gputouse=0, saveiters=save_iterations)
+            deeplabcut.evaluate_network(config_pathma, gputouse=0, plotting=True)
 
         elif answer == 'cv':
             pbounds = {
@@ -142,15 +141,15 @@ def process(config_pathma, config_path3d, videos_dir):
                         'detectionthresholdsquare': (0, 0.9),
                         'minimalnumberofconnections': (1, 6),
                     }
-            evaluate_multianimal_crossvalidate(config_pathma, pbounds=pbounds, target='rpck_test')
+            deeplabcut.evaluate_multianimal_crossvalidate(config_pathma, pbounds=pbounds, target='rpck_test')
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'av':
-            analyze_videos(config_pathma, [videos_dir], videotype='.mp4', gputouse=0, save_as_csv=False)
+            deeplabcut.analyze_videos(config_pathma, [videos_dir], videotype=video_type, gputouse=0, save_as_csv=False)
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'rt':
-            convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
+            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype=video_type, track_method='skeleton')
             pickles = glob(videos_dir+'/*_sk.pickle')
             pickles.sort()
             videos = glob(videos_dir+'/*.mp4')
@@ -158,22 +157,22 @@ def process(config_pathma, config_path3d, videos_dir):
             shape = range(len(pickles))
 
             for i in shape:
-                man, viz = refine_tracklets(config_pathma, pickles[i], videos[i])
+                man, viz = deeplabcut.refine_tracklets(config_pathma, pickles[i], videos[i])
 
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'dt':
-            convert_detections2tracklets(config_pathma, [videos_dir], videotype='.mp4', track_method='skeleton')
+            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype=video_type, track_method='skeleton')
             pickles = glob(videos_dir+'/*_sk.pickle')
             shape = range(len(pickles))
 
             for i in shape:
-                convert_raw_tracks_to_h5(config_pathma, pickles[i])
+                deeplabcut.convert_raw_tracks_to_h5(config_pathma, pickles[i])
 
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'fp':
-            filterpredictions(config_pathma, [videos_dir], videotype='.mp4', filtertype='arima', track_method='skeleton', save_as_csv=False)
+            deeplabcut.filterpredictions(config_pathma, [videos_dir], videotype=video_type, filtertype='arima', track_method='skeleton', save_as_csv=False)
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'tp':
@@ -198,7 +197,7 @@ def process(config_pathma, config_path3d, videos_dir):
             except AttributeError:
                 print('files already modified!')
 
-            triangulate(config_path3d, videos_dir, videotype='.mp4', gputouse=0, filterpredictions=True)
+            deeplabcut.triangulate(config_path3d, videos_dir, videotype=video_type, gputouse=0, filterpredictions=True)
             vids_3d = glob(videos_dir+'/*3D.h5')
 
             for vid_3d in vids_3d:
@@ -223,21 +222,22 @@ def process(config_pathma, config_path3d, videos_dir):
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'lv':
-            create_labeled_video_3d(config_path3d, [videos_dir], videotype='.mp4', trailpoints=10, view=[0,270])
+            deeplabcut.create_labeled_video_3d(config_path3d, [videos_dir], videotype=video_type, trailpoints=10, view=[0,270])
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'eo':
-            extract_outlier_frames(config_pathma, [videos_dir], videotype='.mp4', extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
-            refine_labels(config_pathma)
+            deeplabcut.extract_outlier_frames(config_pathma, [videos_dir], videotype=video_type, extractionalgorithm='kmeans', cluster_resizewidth=10, automatic=True, cluster_color=True, track_method='box')
+            deeplabcut.refine_labels(config_pathma)
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'mn':
-            merge_datasets(config_pathma)
+            deeplabcut.merge_datasets(config_pathma)
             answer = 'tn'
 
         elif answer == 'nv':
-            new_videos_dir = os.path.join(file_dialog('f', 'select video file'))
-            add_new_videos(config_pathma, [new_videos_dir], copy_videos=False)
+            new_videos_dir = os.path.join(file_dialog('dir', 'select video directory'))
+            new_videos_list = glob(new_videos_dir+'/*.mp4')
+            deeplabcut.add_new_videos(config_pathma, new_videos_list, copy_videos=False)
             answer = input('\n'.join(menu_2_0))
 
         elif answer == 'x':
