@@ -73,8 +73,8 @@ def open_project():
 
             while loop:
                 if model == 'l':
-                    config_pathma = r'C:\Users\etarter\Downloads\dlc\test-dlc-2021-01-04\config.yaml'
-                    config_path3d = r'C:\Users\etarter\Downloads\dlc\test1-dlc-2021-01-05-3d\config.yaml'
+                    config_pathma = r'C:\Users\etarter\Documents\Playground\Calibration\dlc\calib-dlc-2021-03-04\config.yaml'
+                    config_path3d = r'C:\Users\etarter\Documents\Playground\Calibration\dlc\calib-dlc-2021-03-04-3d\config.yaml'
                     videos_dir = r'C:\Users\etarter\Downloads\videos'
                     loop = False
 
