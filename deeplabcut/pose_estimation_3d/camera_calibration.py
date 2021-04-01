@@ -145,10 +145,10 @@ def calibrate_cameras(config, cbrow=8, cbcol=6, calibrate=False, alpha=0.4):
                     )
                 else:
                     print("Corners not found for the image %s, deleting image pair..." % Path(fname).name)
-                    rem = glob(os.path.join(Path(fname).parent) + r'\*' + Path(fname).name.split(cam)[-1])
-                    for r in rem:
-                        os.remove(r)
-                    print("...deleted")
+                    # rem = glob.glob(os.path.join(Path(fname).parent) + r'\*' + Path(fname).name.split(cam)[-1])
+                    # for r in rem:
+                    #     os.remove(r)
+                    # print("...deleted")
     try:
         h, w = img.shape[:2]
     except:

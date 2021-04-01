@@ -1,22 +1,30 @@
 import deeplabcut
 import tkinter
 from tkinter import filedialog
-import os
-from glob import glob
 import subprocess
 import pandas as pd
 from pathlib import Path
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.axes._axes import _log as matplotlib_axes_logger
+import cv2
+import os
+import numpy as np
+from tqdm import tqdm
+from deeplabcut.utils import auxiliaryfunctions
+from deeplabcut.utils import auxiliaryfunctions_3d
+from glob import glob
 
+matplotlib_axes_logger.setLevel("ERROR")
+plt.close('all')
 
 def workflow():
 
-    config_pathma, config_path3d, videos_dir, video_type = open_project()
+    config_pathma, config_path3d, videos_dir, realworld_dir, video_type = open_project()
 
     loop = True
     menu_1_0 = ['',
-                '(p) config paths',
+                '(p) print paths',
                 '(w) workflow',
                 '(x) exit',
                 '\n']
@@ -24,11 +32,11 @@ def workflow():
 
     while loop:
         if console == 'p':
-            print_config(config_pathma, config_path3d, videos_dir)
+            print_paths(config_pathma, config_path3d, videos_dir, realworld_dir)
             console = input('\n'.join(menu_1_0))
 
         elif console == 'w':
-            process(config_pathma, config_path3d, videos_dir, video_type)
+            process(config_pathma, config_path3d, videos_dir, realworld_dir, video_type)
             console = input('\n'.join(menu_1_0))
 
         elif console == 'x':
@@ -38,12 +46,10 @@ def workflow():
             print('error\n')
             console = input('\n'.join(menu_1_0))
 
-    return config_pathma, config_path3d, videos_dir
+    return config_pathma, config_path3d, videos_dir, realworld_dir
 
 
 def open_project():
-
-
 
     menu_0_0 = ['',
                 '(n) new project',
@@ -75,6 +81,7 @@ def open_project():
                     print('error\n')
                     video_type = input('\n'.join(menu_0_1))
             videos_dir = os.path.join(file_dialog('dir', 'select video directory'))
+            realworld_dir = os.path.join(file_dialog('dir', 'select realworld directory'))
             config_pathma = deeplabcut.create_new_project(project_name, your_name, [videos_dir], videotype=video_type, copy_videos=False, multianimal=True)
             config_path3d = deeplabcut.create_new_project_3d(project_name, your_name, num_cameras=2)
             print('edit config files')
@@ -95,6 +102,7 @@ def open_project():
                     config_pathma = r'C:\Users\etarter\Documents\Playground\Calibration Depth\dlc\calibration-depth-dlc-2021-03-10\config.yaml'
                     config_path3d = r'C:\Users\etarter\Documents\Playground\Calibration Depth\dlc\calibration-depth-dlc-2021-03-09-3d\config.yaml'
                     videos_dir = r'C:\Users\etarter\Documents\Playground\Calibration Depth\videos'
+                    realworld_dir = r'C:\Users\etarter\Documents\Playground\Calibration Depth\realworld'
                     video_type = '.avi'
                     loop_1 = False
 
@@ -102,6 +110,7 @@ def open_project():
                     config_pathma = os.path.join(file_dialog('f', 'select multianimal config file'))
                     config_path3d = os.path.join(file_dialog('f', 'select 3d config file'))
                     videos_dir = os.path.join(file_dialog('dir', 'select videos dir'))
+                    realworld_dir = os.path.join(file_dialog('dir', 'select realworld directory'))
                     files = glob(os.path.join(videos_dir, '*.avi'))
                     if len(files) == 0:
                         video_type = '.mp4'
@@ -118,10 +127,10 @@ def open_project():
             print('error\n')
             console = input('\n'.join(menu_0_0))
 
-    return config_pathma, config_path3d, videos_dir, video_type
+    return config_pathma, config_path3d, videos_dir, realworld_dir, video_type
 
 
-def process(config_pathma, config_path3d, videos_dir, video_type):
+def process(config_pathma, config_path3d, videos_dir, realworld_dir, video_type):
 
     menu_2_0 = ['',
                 'main functions\n',
@@ -133,8 +142,11 @@ def process(config_pathma, config_path3d, videos_dir, video_type):
                 '(rt) refine tracklets',
                 '(fp) filter predictions',
                 '(tp) triangulate',
+                '(la) extract limb angles',
                 '\nextra functions\n',
                 '(cc) calibrate cameras',
+                '(rw) set realworld coordinates',
+                '(tr) triangulate realworld coordinates',
                 '(dt) convert detections to tracklets',
                 '(lv) create labeled video',
                 '(eo) extract and refine outlier frames',
@@ -149,6 +161,7 @@ def process(config_pathma, config_path3d, videos_dir, video_type):
         if answer == 'ef':
             deeplabcut.extract_frames(config_pathma, mode='automatic', algo='kmeans', userfeedback=False, cluster_resizewidth=10, cluster_step=1)
             answer = input('\n'.join(menu_2_0))
+
 
         elif answer == 'lf':
             deeplabcut.label_frames(config_pathma)
@@ -185,16 +198,6 @@ def process(config_pathma, config_path3d, videos_dir, video_type):
 
             for i in shape:
                 man, viz = deeplabcut.refine_tracklets(config_pathma, pickles[i], videos[i])
-
-            answer = input('\n'.join(menu_2_0))
-
-        elif answer == 'dt':
-            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype=video_type, track_method='skeleton')
-            pickles = glob(videos_dir+'/*_sk.pickle')
-            shape = range(len(pickles))
-
-            for i in shape:
-                deeplabcut.convert_raw_tracks_to_h5(config_pathma, pickles[i])
 
             answer = input('\n'.join(menu_2_0))
 
@@ -266,6 +269,9 @@ def process(config_pathma, config_path3d, videos_dir, video_type):
 
             answer = input('\n'.join(menu_2_0))
 
+        elif answer == 'la':
+            print('not implemented yet')
+            answer = input('\n'.join(menu_2_0))
 
         elif answer == 'cc':
             cbrows = input('chessboard rows: ')
@@ -298,6 +304,24 @@ def process(config_pathma, config_path3d, videos_dir, video_type):
 
             answer = input('\n'.join(menu_2_0))
 
+        elif answer == 'rw':
+            realworld(realworld_dir)
+            answer = input('\n'.join(menu_2_0))
+
+        elif answer == 'tr':
+            triangulate_realworld(config_path3d, videos_dir, realworld_dir)
+            answer = input('\n'.join(menu_2_0))
+
+        elif answer == 'dt':
+            deeplabcut.convert_detections2tracklets(config_pathma, [videos_dir], videotype=video_type, track_method='skeleton')
+            pickles = glob(videos_dir+'/*_sk.pickle')
+            shape = range(len(pickles))
+
+            for i in shape:
+                deeplabcut.convert_raw_tracks_to_h5(config_pathma, pickles[i])
+
+            answer = input('\n'.join(menu_2_0))
+
         elif answer == 'lv':
             #config3d file needs to have synthetic skeleton for this to work!!
             #example: instead of head and dock, individual1_head, individual2_dock etc. for each individual separately!
@@ -326,9 +350,9 @@ def process(config_pathma, config_path3d, videos_dir, video_type):
             answer = input('error\n')
 
 
-def print_config(config_pathma, config_path3d, videos_dir):
+def print_paths(config_pathma, config_path3d, videos_dir, realworld_dir):
 
-    print('\nconfig_pathma\t', config_pathma, '\nconfig_path3d\t', config_path3d, '\nvideos_dir\t', videos_dir)
+    print('\nconfig_pathma\t', config_pathma, '\nconfig_path3d\t', config_path3d, '\nvideos_dir\t', videos_dir, '\nrealworld_dir\t', realworld_dir)
 
 
 def file_dialog(type, text):
@@ -346,3 +370,163 @@ def file_dialog(type, text):
     root.withdraw()
 
     return path
+
+
+def realworld(realworld_dir):
+
+    class RealWorld():
+        def __init__(self):
+            self.coords = []
+            self.counter = 0
+
+        def onclick(self, event):
+            x, y = event.xdata, event.ydata
+            self.coords.append([self.counter, x, y])
+            ax.plot([x], [y], 'bx')
+            plt.annotate(str(self.counter), (x + 10, y))
+            self.counter += 1
+            plt.show()
+
+    images = glob(realworld_dir + '\*.jpg')
+    existing = glob(realworld_dir + '\*.csv')
+
+    if len(existing) == 0:
+        for image in images:
+            realWorld = RealWorld()
+
+            plt.close('all')
+
+            img = cv2.imread(image)
+
+            fig, ax = plt.subplots()
+
+            plt.imshow(cv2.cvtColor(img,cv2.COLOR_BGR2RGB))
+            fig.canvas.mpl_connect('button_press_event', realWorld.onclick)
+            plt.show()
+
+            coords_df = pd.DataFrame(realWorld.coords, columns=['point', 'x', 'y'])
+            coords_df.to_csv(os.path.join(realworld_dir, os.path.basename(image).split('.')[0]+'_realworld.csv'), index=False)
+
+            fig, ax = plt.subplots()
+            for i in range(coords_df.shape[0]):
+                x = coords_df.x.iloc[i]
+                y = coords_df.y.iloc[i]
+                ax.plot([x], [y], 'bx')
+                plt.annotate(str(i), (x + 10, y))
+
+            plt.imshow(cv2.cvtColor(img,cv2.COLOR_BGR2RGB))
+            plt.savefig(os.path.join(realworld_dir, os.path.basename(image).split('.')[0]+'_realworld.jpg'))
+
+    else:
+        print('\nreal world coordinates already extracted!\n')
+
+
+def triangulate_realworld(config_path3d, videos_dir, realworld_dir):
+
+    existing = glob(realworld_dir + '\*_realworld3D.csv')
+
+    if len(existing) == 0:
+        realworld_coords = glob(realworld_dir + '\*_realworld.csv')
+        frame_no = 500
+
+        size = len(realworld_coords)
+
+        for i in range(int(size/2)):
+            if i == 0:
+                realworld_cam1_df = pd.read_csv(realworld_coords[i]).sort_values(by=['point'])
+                realworld_cam2_df = pd.read_csv(realworld_coords[int(size/2)+i]).sort_values(by=['point'])
+            else:
+                next_cam1 = pd.read_csv(realworld_coords[i]).sort_values(by=['point'])
+                next_cam2 = pd.read_csv(realworld_coords[int(size/2)+i]).sort_values(by=['point'])
+                realworld_cam1_df = realworld_cam1_df.append(next_cam1, ignore_index=True)
+                realworld_cam2_df = realworld_cam2_df.append(next_cam2, ignore_index=True)
+
+        realworld_cam1 = np.array(realworld_cam1_df.iloc[:,1:])
+        realworld_cam2 = np.array(realworld_cam2_df.iloc[:,1:])
+
+        cfg_3d = auxiliaryfunctions.read_config(config_path3d)
+        img_path, path_corners, path_camera_matrix, path_undistort = auxiliaryfunctions_3d.Foldernames3Dproject(cfg_3d)
+
+        cam_names = cfg_3d["camera_names"]
+        camera_pair = str(cam_names[0] + "-" + cam_names[1])
+
+        path_stereo_file = os.path.join(path_camera_matrix, "stereo_params.pickle")
+        stereo_file = auxiliaryfunctions.read_pickle(path_stereo_file)
+
+        mtx_l = stereo_file[camera_pair]["cameraMatrix1"]
+        dist_l = stereo_file[camera_pair]["distCoeffs1"]
+
+        mtx_r = stereo_file[camera_pair]["cameraMatrix2"]
+        dist_r = stereo_file[camera_pair]["distCoeffs2"]
+
+        R1 = stereo_file[camera_pair]["R1"]
+        P1 = stereo_file[camera_pair]["P1"]
+
+        R2 = stereo_file[camera_pair]["R2"]
+        P2 = stereo_file[camera_pair]["P2"]
+
+        realworld_cam1_undistort = cv2.undistortPoints(
+            src=realworld_cam1.astype(np.float32),
+            cameraMatrix=mtx_l,
+            distCoeffs=dist_l,
+            P=P1,
+            R=R1,
+        )
+
+        realworld_cam2_undistort = cv2.undistortPoints(
+            src=realworld_cam2.astype(np.float32),
+            cameraMatrix=mtx_r,
+            distCoeffs=dist_r,
+            P=P2,
+            R=R2,
+        )
+
+        filename_3d = glob(videos_dir + '\*3D.h5')[0]
+        trackingfile_3d_df = pd.read_hdf(filename_3d).iloc[frame_no:frame_no+1]
+
+        realworld_3d = auxiliaryfunctions_3d.triangulatePoints(P1[:3], P2[:3], realworld_cam1_undistort, realworld_cam2_undistort)[:-1, :].T
+        realworld_3d_df = pd.DataFrame(realworld_3d, columns=['x', 'y', 'z'])
+        realworld_3d_df.insert(0, realworld_cam1_df.columns[0], realworld_cam1_df.point)
+        realworld_3d_df.to_csv(os.path.join(realworld_dir, os.path.basename(filename_3d).split('.')[0] + '_realworld3D.csv'))
+
+        plt.close('all')
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        x = list(realworld_3d_df.x)
+        y = list(realworld_3d_df.y)
+        z = list(realworld_3d_df.z)
+
+        points = list(realworld_3d_df.point)
+
+        size = len(points)
+
+        columns = trackingfile_3d_df.columns.to_frame(index=False)
+        bps = columns.bodyparts.unique()
+
+        for bp in bps:
+            x.append(trackingfile_3d_df.DLC_3D[bp].x.iloc[0])
+            y.append(trackingfile_3d_df.DLC_3D[bp].y.iloc[0])
+            z.append(trackingfile_3d_df.DLC_3D[bp].z.iloc[0])
+
+        x = np.array(x)
+        y = np.array(y)
+        z = np.array(z)
+
+        ax.scatter(x[:size], y[:size], z[:size], c='b', marker='s', label='realworld')
+        for i in range(size):
+            ax.text(x[i], y[i], z[i], str(points[i]), None)
+
+        ax.scatter(x[size:], y[size:], z[size:], c='r', marker='o', label='dlc')
+        for i in range(size, len(x)):
+            ax.text(x[i], y[i], z[i], str(i-size), None)
+
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        plt.legend(loc='upper left');
+        plt.show()
+
+    else:
+        print('\nreal world coordinates already triangulated!\n')
